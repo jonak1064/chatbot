@@ -10,6 +10,20 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  final _formKey = GlobalKey<FormState>();
+  var _isLogin = true;
+  var _enteredEmail = '';
+  var _enteredPassword = '';
+  void _submit() {
+    final isValid = _formKey.currentState!.validate();
+
+    if (isValid) {
+      _formKey.currentState!.save();
+      print(_enteredEmail);
+      print(_enteredPassword);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,25 +49,67 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Form(
-                        child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: 'Email Address',
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              labelText: 'Email Address',
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                            autocorrect: false,
+                            textCapitalization: TextCapitalization.none,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.trim().isEmpty ||
+                                  !value.contains('@')) {
+                                return 'PLease enter a valid email address.';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _enteredEmail = value!;
+                            },
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          autocorrect: false,
-                          textCapitalization: TextCapitalization.none,
-                        ),
-                        TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              labelText: 'Password',
+                            ),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.trim().length < 6) {
+                                return 'Password must be at least 6 character long';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _enteredPassword = value!;
+                            },
                           ),
-                          obscureText: true,
-                        ),
-                      ],
-                    )),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: _submit,
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                            child: Text(_isLogin ? 'login' : 'Sign Up'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _isLogin = !_isLogin;
+                              });
+                            },
+                            child: Text(_isLogin
+                                ? 'Create an account'
+                                : 'I already have an account'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
